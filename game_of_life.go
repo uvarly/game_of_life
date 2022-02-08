@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"math/rand"
 	"time"
 )
@@ -56,11 +55,7 @@ func (gol *gameOfLife) step() {
 	}
 }
 
-func (gol *gameOfLife) populate(h, w int, d float64) error {
-	if d < 0 || d > 1 {
-		return errors.New("density value out of range: [0.0, 1.0]")
-	}
-
+func (gol *gameOfLife) populate(h, w int, d float64) {
 	rand.Seed(time.Now().UnixNano())
 	threshold := int(100 * d)
 
@@ -73,8 +68,6 @@ func (gol *gameOfLife) populate(h, w int, d float64) error {
 			}
 		}
 	}
-
-	return nil
 }
 
 func (gol *gameOfLife) String() string {
