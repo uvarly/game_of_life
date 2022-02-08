@@ -4,29 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"runtime"
 	"time"
 )
 
-var clear func()
-
-func init() {
-	switch runtime.GOOS {
-	case "linux":
-		clear = func() {
-			// cmd := exec.Command("clear")
-			// cmd.Stdout = os.Stdout
-			// cmd.Run()
-			fmt.Print("\x1B[2J")
-		}
-	case "windows":
-		clear = func() {
-			// cmd := exec.Command("cmd", "/c", "cls")
-			// cmd.Stdout = os.Stdout
-			// cmd.Run()
-			fmt.Print("\x1B[2J")
-		}
-	}
+func reset(height int) {
+	fmt.Printf("\x1B[%dA", height+4)
 }
 
 func main() {
@@ -61,8 +43,6 @@ func main() {
 	gol := NewGameOfLife()
 	gol.populate(*h, *w, *d)
 
-	clear()
-
 	fmt.Println("Turn 0")
 	fmt.Println(gol)
 
@@ -70,7 +50,9 @@ func main() {
 		time.Sleep(time.Second / time.Duration(*u))
 
 		gol.step()
-		clear()
+
+		reset(len(gol.board))
+
 		fmt.Printf("Turn %d\n", i)
 		fmt.Println(gol)
 	}
