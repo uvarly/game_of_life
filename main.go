@@ -31,12 +31,12 @@ func main() {
 	flag.Parse()
 
 	if *h < 1 || *h > H_LIMIT {
-		fmt.Printf("Board scale out of acceptable range [0, %d]\n", H_LIMIT)
+		fmt.Printf("Board scale out of acceptable range [1, %d]\n", H_LIMIT)
 		return
 	}
 
 	if *w < 1 || *w > W_LIMIT {
-		fmt.Printf("Board scale out of acceptable range [0, %d]\n", W_LIMIT)
+		fmt.Printf("Board scale out of acceptable range [, %d]\n", W_LIMIT)
 		return
 	}
 
