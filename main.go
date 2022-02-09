@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	H_LIMIT = 100
-	W_LIMIT = 200
-	U_LIMIT = 30
+	H_LIMIT = 1_000
+	W_LIMIT = 2_000
+	U_LIMIT = 120
 	C_LIMIT = math.MaxInt
 )
 
@@ -20,8 +20,8 @@ func reset(height int) {
 }
 
 func main() {
-	h := flag.Int("height", 25, fmt.Sprintf("Board height. Acceptable range: [0,%d]", H_LIMIT))
-	w := flag.Int("width", 100, fmt.Sprintf("Board width. Acceptable range: [0, %d]", W_LIMIT))
+	h := flag.Int("height", 50, fmt.Sprintf("Board height. Acceptable range: [0,%d]", H_LIMIT))
+	w := flag.Int("width", 150, fmt.Sprintf("Board width. Acceptable range: [0, %d]", W_LIMIT))
 	d := flag.Float64("density", 0.33, "Spawn chance. 0 - no cells spawn. 1 - fills board completely.  Acceptable range: [0.0, 1.0]")
 	u := flag.Int("update", 10, fmt.Sprintf("Simulation updates per second. Acceptable range: [1, %d]", U_LIMIT))
 	c := flag.Int("count", 1000, fmt.Sprintf("Simulation steps. Acceptable range: [1, %d]", C_LIMIT))
@@ -53,21 +53,21 @@ func main() {
 		return
 	}
 
-	gol := NewGameOfLife()
-	gol.populate(*h, *w, *d)
+	g := NewGameOfLife()
+	g.populate(*h, *w, *d)
 
 	fmt.Println("Turn 0")
-	fmt.Println(gol)
+	fmt.Println(g)
 
 	for i := 1; i <= *c; i++ {
 		time.Sleep(time.Second / time.Duration(*u))
 
-		gol.step()
+		g.step()
 
-		reset(len(gol.board))
+		reset(len(g.board))
 
 		fmt.Printf("Turn %d\n", i)
-		fmt.Println(gol)
+		fmt.Println(g)
 	}
 
 	os.Exit(0)

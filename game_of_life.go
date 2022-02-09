@@ -14,7 +14,7 @@ func NewGameOfLife() *gameOfLife {
 	return &gameOfLife{}
 }
 
-func (gol *gameOfLife) willLive(i, j int) bool {
+func (g *gameOfLife) willLive(i, j int) bool {
 	var neighbourCount int
 
 	for _, k := range [3]int{-1, 0, 1} {
@@ -22,59 +22,59 @@ func (gol *gameOfLife) willLive(i, j int) bool {
 			if k == 0 && l == 0 {
 				continue
 			}
-			if i+k >= 0 && i+k < len(gol.board) && j+l >= 0 && j+l < len(gol.board[i]) {
-				neighbourCount += gol.board[i+k][j+l] & 1
+			if i+k >= 0 && i+k < len(g.board) && j+l >= 0 && j+l < len(g.board[i]) {
+				neighbourCount += g.board[i+k][j+l] & 1
 			}
 		}
 	}
 
-	if gol.board[i][j]&1 == 1 && (neighbourCount == 2 || neighbourCount == 3) {
+	if g.board[i][j]&1 == 1 && (neighbourCount == 2 || neighbourCount == 3) {
 		return true
 	}
 
-	if gol.board[i][j]&1 == 0 && neighbourCount == 3 {
+	if g.board[i][j]&1 == 0 && neighbourCount == 3 {
 		return true
 	}
 
 	return false
 }
 
-func (gol *gameOfLife) step() {
-	for i := range gol.board {
-		for j := range gol.board[i] {
-			if gol.willLive(i, j) {
-				gol.board[i][j] |= 2
+func (g *gameOfLife) step() {
+	for i := range g.board {
+		for j := range g.board[i] {
+			if g.willLive(i, j) {
+				g.board[i][j] |= 2
 			}
 		}
 	}
 
-	for i := range gol.board {
-		for j := range gol.board[i] {
-			gol.board[i][j] >>= 1
+	for i := range g.board {
+		for j := range g.board[i] {
+			g.board[i][j] >>= 1
 		}
 	}
 }
 
-func (gol *gameOfLife) populate(h, w int, d float64) {
+func (g *gameOfLife) populate(h, w int, d float64) {
 	rand.Seed(time.Now().UnixNano())
 	threshold := int(100 * d)
 
-	gol.board = make([][]int, h)
-	for i := range gol.board {
-		gol.board[i] = make([]int, w)
-		for j := range gol.board[i] {
+	g.board = make([][]int, h)
+	for i := range g.board {
+		g.board[i] = make([]int, w)
+		for j := range g.board[i] {
 			if rand.Intn(100) < threshold {
-				gol.board[i][j] = 1
+				g.board[i][j] = 1
 			}
 		}
 	}
 }
 
-func (gol *gameOfLife) String() string {
+func (g *gameOfLife) String() string {
 	var buf bytes.Buffer
 
-	for i := -1; i <= len(gol.board[0]); i++ {
-		if i == -1 || i == len(gol.board[0]) {
+	for i := -1; i <= len(g.board[0]); i++ {
+		if i == -1 || i == len(g.board[0]) {
 			buf.WriteByte(byte('+'))
 		} else {
 			buf.WriteByte(byte('-'))
@@ -82,13 +82,13 @@ func (gol *gameOfLife) String() string {
 	}
 	buf.WriteByte('\n')
 
-	for i := 0; i < len(gol.board); i++ {
-		for j := -1; j <= len(gol.board[i]); j++ {
-			if j == -1 || j == len(gol.board[i]) {
+	for i := 0; i < len(g.board); i++ {
+		for j := -1; j <= len(g.board[i]); j++ {
+			if j == -1 || j == len(g.board[i]) {
 				buf.WriteByte(byte('|'))
 				continue
 			}
-			if gol.board[i][j]&1 == 1 {
+			if g.board[i][j]&1 == 1 {
 				buf.WriteByte(byte('*'))
 			} else {
 				buf.WriteByte(byte(' '))
@@ -97,8 +97,8 @@ func (gol *gameOfLife) String() string {
 		buf.WriteByte('\n')
 	}
 
-	for i := 0; i < len(gol.board[0])+2; i++ {
-		if i == 0 || i == len(gol.board[0])+1 {
+	for i := 0; i < len(g.board[0])+2; i++ {
+		if i == 0 || i == len(g.board[0])+1 {
 			buf.WriteByte(byte('+'))
 		} else {
 			buf.WriteByte(byte('-'))
