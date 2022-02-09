@@ -2,62 +2,27 @@ package main
 
 import (
 	"bytes"
+	"math"
 	"math/rand"
+	"sync"
 	"time"
 )
 
-type gameOfLife struct {
-	board [][]int
+type GameOfLife struct {
+	wg sync.WaitGroup
+
+	board   [][]int
+	workers []chan<- struct{}
 }
 
-func NewGameOfLife() *gameOfLife {
-	return &gameOfLife{}
+func NewGameOfLife() *GameOfLife {
+	return &GameOfLife{}
 }
 
-func (g *gameOfLife) willLive(i, j int) bool {
-	var neighbourCount int
-
-	for _, k := range [3]int{-1, 0, 1} {
-		for _, l := range [3]int{-1, 0, 1} {
-			if k == 0 && l == 0 {
-				continue
-			}
-			if i+k >= 0 && i+k < len(g.board) && j+l >= 0 && j+l < len(g.board[i]) {
-				neighbourCount += g.board[i+k][j+l] & 1
-			}
-		}
-	}
-
-	if g.board[i][j]&1 == 1 && (neighbourCount == 2 || neighbourCount == 3) {
-		return true
-	}
-
-	if g.board[i][j]&1 == 0 && neighbourCount == 3 {
-		return true
-	}
-
-	return false
-}
-
-func (g *gameOfLife) step() {
-	for i := range g.board {
-		for j := range g.board[i] {
-			if g.willLive(i, j) {
-				g.board[i][j] |= 2
-			}
-		}
-	}
-
-	for i := range g.board {
-		for j := range g.board[i] {
-			g.board[i][j] >>= 1
-		}
-	}
-}
-
-func (g *gameOfLife) populate(h, w int, d float64) {
-	rand.Seed(time.Now().UnixNano())
+func (g *GameOfLife) Populate(h, w int, d float64) {
 	threshold := int(100 * d)
+
+	rand.Seed(time.Now().UnixNano())
 
 	g.board = make([][]int, h)
 	for i := range g.board {
@@ -68,9 +33,19 @@ func (g *gameOfLife) populate(h, w int, d float64) {
 			}
 		}
 	}
+
+	g.generateWorkers()
 }
 
-func (g *gameOfLife) String() string {
+func (g *GameOfLife) Step() {
+	g.wg.Add(len(g.workers))
+	for _, exec := range g.workers {
+		exec <- struct{}{}
+	}
+	g.wg.Wait()
+}
+
+func (g *GameOfLife) String() string {
 	var buf bytes.Buffer
 
 	for i := -1; i <= len(g.board[0]); i++ {
@@ -107,4 +82,83 @@ func (g *gameOfLife) String() string {
 	buf.WriteByte('\n')
 
 	return buf.String()
+}
+
+func (g *GameOfLife) willLive(i, j int) bool {
+	var neighbourCount int
+
+	for _, k := range [3]int{-1, 0, 1} {
+		for _, l := range [3]int{-1, 0, 1} {
+			if k == 0 && l == 0 {
+				continue
+			}
+			if i+k >= 0 && i+k < len(g.board) && j+l >= 0 && j+l < len(g.board[i]) {
+				neighbourCount += g.board[i+k][j+l] & 1
+			}
+		}
+	}
+
+	if g.board[i][j]&1 == 1 && (neighbourCount == 2 || neighbourCount == 3) {
+		return true
+	}
+
+	if g.board[i][j]&1 == 0 && neighbourCount == 3 {
+		return true
+	}
+
+	return false
+}
+
+func (g *GameOfLife) work(exec <-chan struct{}, begin, end int) {
+	for range exec {
+		for i := begin; i < end; i++ {
+			for j := range g.board[i] {
+				if g.willLive(i, j) {
+					g.board[i][j] |= 2
+				}
+			}
+		}
+
+		for i := begin; i < end; i++ {
+			for j := range g.board[i] {
+				g.board[i][j] >>= 1
+			}
+		}
+
+		g.wg.Done()
+	}
+}
+
+func (g *GameOfLife) generateWorkers() {
+	var (
+		taskCount   = len(g.board)
+		workerCount = int(math.Log2(float64(taskCount))) + 1
+		workloads   = splitWorkload(taskCount, workerCount)
+		i           = 0
+	)
+
+	for _, wl := range workloads {
+		exec := make(chan struct{})
+
+		go g.work(exec, i, i+wl)
+		g.workers = append(g.workers, exec)
+
+		i += wl
+	}
+}
+
+func splitWorkload(tasks, workers int) []int {
+	var (
+		workloads  = make([]int, workers)
+		breakpoint = workers - (tasks % workers)
+	)
+
+	for i := range workloads {
+		workloads[i] = tasks / workers
+		if i >= breakpoint {
+			workloads[i]++
+		}
+	}
+
+	return workloads
 }
