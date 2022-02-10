@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	H_LIMIT = 10_000
-	W_LIMIT = 20_000
+	H_LIMIT = 1_000
+	W_LIMIT = 2_000
 	U_LIMIT = 120
 	C_LIMIT = math.MaxInt
 )
@@ -67,6 +67,10 @@ func main() {
 	fmt.Println(g)
 
 	for range ticker.C {
+		if i++; i > *c {
+			break
+		}
+
 		time.Sleep(time.Second / time.Duration(*u))
 
 		g.Step()
@@ -75,10 +79,6 @@ func main() {
 
 		fmt.Printf("Turn %d\n", i)
 		fmt.Println(g)
-
-		if i++; i >= *c {
-			break
-		}
 	}
 
 	os.Exit(0)

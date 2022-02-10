@@ -11,7 +11,7 @@ import (
 type GameOfLife struct {
 	wg sync.WaitGroup
 
-	board   [][]int
+	board   [][]uint8
 	workers []chan<- struct{}
 }
 
@@ -24,9 +24,9 @@ func (g *GameOfLife) Populate(h, w int, d float64) {
 
 	rand.Seed(time.Now().UnixNano())
 
-	g.board = make([][]int, h)
+	g.board = make([][]uint8, h)
 	for i := range g.board {
-		g.board[i] = make([]int, w)
+		g.board[i] = make([]uint8, w)
 		for j := range g.board[i] {
 			if rand.Intn(100) < threshold {
 				g.board[i][j] = 1
@@ -85,7 +85,7 @@ func (g *GameOfLife) String() string {
 }
 
 func (g *GameOfLife) willLive(i, j int) bool {
-	var neighbourCount int
+	var neighbourCount uint8
 
 	for _, k := range [3]int{-1, 0, 1} {
 		for _, l := range [3]int{-1, 0, 1} {
