@@ -150,9 +150,9 @@ func (g *GameOfLife) work(exec <-chan struct{}, begin, end int) {
 // a worker to handle each.
 func (g *GameOfLife) generateWorkers() {
 	var (
-		taskCount   = len(g.board)
-		workerCount = int(math.Log2(float64(taskCount))) + 1
-		workloads   = splitWorkload(taskCount, workerCount)
+		workAmount  = len(g.board)
+		workerCount = int(math.Log2(float64(workAmount + 1)))
+		workloads   = splitWorkload(workAmount, workerCount)
 		i           = 0
 	)
 
