@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	H_LIMIT = 1_000
-	W_LIMIT = 2_000
-	U_LIMIT = 120
-	C_LIMIT = math.MaxInt
+	hLimit = 1_000
+	wLimit = 2_000
+	uLimit = 120
+	cLimit = math.MaxInt
 )
 
 func reset(height int) {
@@ -21,22 +21,22 @@ func reset(height int) {
 
 func main() {
 	var (
-		h = flag.Int("height", 50, fmt.Sprintf("Board height. Acceptable range: [1, %d]", H_LIMIT))
-		w = flag.Int("width", 150, fmt.Sprintf("Board width. Acceptable range: [1, %d]", W_LIMIT))
+		h = flag.Int("height", 50, fmt.Sprintf("Board height. Acceptable range: [1, %d]", hLimit))
+		w = flag.Int("width", 150, fmt.Sprintf("Board width. Acceptable range: [1, %d]", wLimit))
 		d = flag.Float64("density", 0.33, "Spawn chance. 0 - no cells spawn. 1 - fills board completely.  Acceptable range: [0.0, 1.0]")
-		u = flag.Int("update", 10, fmt.Sprintf("Simulation updates per second. Acceptable range: [1, %d]", U_LIMIT))
-		c = flag.Int("count", 1000, fmt.Sprintf("Simulation steps. Acceptable range: [1, %d]", C_LIMIT))
+		u = flag.Int("update", 10, fmt.Sprintf("Simulation updates per second. Acceptable range: [1, %d]", uLimit))
+		c = flag.Int("count", 1000, fmt.Sprintf("Simulation steps. Acceptable range: [1, %d]", cLimit))
 	)
 
 	flag.Parse()
 
-	if *h < 1 || *h > H_LIMIT {
-		fmt.Printf("Board scale out of acceptable range [1, %d]\n", H_LIMIT)
+	if *h < 1 || *h > hLimit {
+		fmt.Printf("Board scale out of acceptable range [1, %d]\n", hLimit)
 		return
 	}
 
-	if *w < 1 || *w > W_LIMIT {
-		fmt.Printf("Board scale out of acceptable range [1, %d]\n", W_LIMIT)
+	if *w < 1 || *w > wLimit {
+		fmt.Printf("Board scale out of acceptable range [1, %d]\n", wLimit)
 		return
 	}
 
@@ -45,13 +45,13 @@ func main() {
 		return
 	}
 
-	if *u < 1 || *u > U_LIMIT {
-		fmt.Printf("Simulation update value out of acceptable range [1, %d]\n", U_LIMIT)
+	if *u < 1 || *u > uLimit {
+		fmt.Printf("Simulation update value out of acceptable range [1, %d]\n", uLimit)
 		return
 	}
 
-	if *c < 1 || *c > C_LIMIT {
-		fmt.Printf("Simulation steps value out of acceptable range [1, %d]\n", C_LIMIT)
+	if *c < 1 || *c > cLimit {
+		fmt.Printf("Simulation steps value out of acceptable range [1, %d]\n", cLimit)
 		return
 	}
 

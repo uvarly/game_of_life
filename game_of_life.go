@@ -8,17 +8,26 @@ import (
 	"time"
 )
 
+// GameOfLife is an implementation of John Conway's Game of Life.
+//
+// The simulation is run in a configurable rectangular window through standart
+// output.
 type GameOfLife struct {
-	wg sync.WaitGroup
-
+	wg      sync.WaitGroup
 	board   [][]uint8
 	workers []chan<- struct{}
 }
 
+// NewGameOfLife returns a new GameOfLife that will run a simulation
+// determined by the rules of John Conway's Game of Life
 func NewGameOfLife() *GameOfLife {
 	return &GameOfLife{}
 }
 
+// Populate fills the hidden board of configurable scale with cells.
+//
+// The probability for a cell to appear is determined by the passed
+// floating point value ranging between 0 and 1.
 func (g *GameOfLife) Populate(h, w int, d float64) {
 	threshold := int(100 * d)
 
@@ -37,6 +46,10 @@ func (g *GameOfLife) Populate(h, w int, d float64) {
 	g.generateWorkers()
 }
 
+// Step progresses simulation by one step.
+//
+// It takes into account the neighbour count of each individual cell
+// and determines the new state of each cell simultaneously.
 func (g *GameOfLife) Step() {
 	g.wg.Add(len(g.workers))
 	for _, exec := range g.workers {
@@ -84,6 +97,7 @@ func (g *GameOfLife) String() string {
 	return buf.String()
 }
 
+// willLive tells whether cell survives the next emulation step or not.
 func (g *GameOfLife) willLive(i, j int) bool {
 	var neighbourCount uint8
 
@@ -109,6 +123,9 @@ func (g *GameOfLife) willLive(i, j int) bool {
 	return false
 }
 
+// work evaluates a designated sector of a board by the rules of Game of Life.
+//
+// It is designed to run concurrently
 func (g *GameOfLife) work(exec <-chan struct{}, begin, end int) {
 	for range exec {
 		for i := begin; i < end; i++ {
@@ -129,6 +146,8 @@ func (g *GameOfLife) work(exec <-chan struct{}, begin, end int) {
 	}
 }
 
+// generateWorkers slpits the board into roughly equal chunks and allocates
+// a worker to handle each.
 func (g *GameOfLife) generateWorkers() {
 	var (
 		taskCount   = len(g.board)
@@ -147,6 +166,11 @@ func (g *GameOfLife) generateWorkers() {
 	}
 }
 
+// splitWorkload returns a slice containing the number of tasks to be given to
+// each of the workers.
+//
+// It is designed to split the workload between workers such that difference
+// between the smallest and the largest workload is minimal
 func splitWorkload(tasks, workers int) []int {
 	var (
 		workloads  = make([]int, workers)
