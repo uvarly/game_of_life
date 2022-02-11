@@ -166,19 +166,19 @@ func (g *GameOfLife) generateWorkers() {
 	}
 }
 
-// splitWorkload returns a slice containing the number of tasks to be given to
+// splitWorkload returns a slice containing a workload to be given to
 // each of the workers.
 //
-// It is designed to split the workload between workers such that difference
-// between the smallest and the largest workload is minimal
-func splitWorkload(tasks, workers int) []int {
+// It is designed to split a given amount of work such that difference between
+// the smallest and the largest workload is minimal
+func splitWorkload(workAmount, workerAmount int) []int {
 	var (
-		workloads  = make([]int, workers)
-		breakpoint = workers - (tasks % workers)
+		workloads  = make([]int, workerAmount)
+		breakpoint = workerAmount - (workAmount % workerAmount)
 	)
 
 	for i := range workloads {
-		workloads[i] = tasks / workers
+		workloads[i] = workAmount / workerAmount
 		if i >= breakpoint {
 			workloads[i]++
 		}
